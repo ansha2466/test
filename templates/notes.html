@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>AI-Powered Notes</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Left Sidebar -->
+    <div class="sidebar">
+      <div class="logo">ACTION AGENDA</div>
+      <input type="text" class="search-bar" placeholder="Search...">
+      <div class="menu">
+        <a href="home.html" class="menu-btn">Home</a>
+        <a href="must-do.html" class="menu-btn">Must do</a>
+        <a href="could-do.html" class="menu-btn">Could do</a>
+        <a href="notes.html" class="menu-btn">Notes</a>
+      </div>
+    </div>
+
+    <!-- Right Content Area -->
+    <div class="content">
+      <h2>Notes</h2>
+      <div class="input-area">
+        <input type="text" id="note-input" placeholder="Write a note...">
+        <button onclick="addNote()">Add Note</button>
+        <button onclick="generateNote()">Generate with AI</button>
+      </div>
+      <ul id="note-list"></ul>
+    </div>
+  </div>
+
+  <script>
+    const API_KEY = "AIzaSyDRHpfgYv_GPL44Q0EoU7YEMtGyxQasZYI"; // Replace with your actual API key
+
+    // Load saved notes from local storage
+    document.addEventListener("DOMContentLoaded", () => {
+      const savedNotes = JSON.parse(localStorage.getItem("notes")) || [];
+      savedNotes.forEach((note) => displayNote(note));
+    });
+
+    function addNote() {
+      const noteInput = document.getElementById("note-input").value.trim();
+      if (noteInput === "") {
+        alert("Please enter a note!");
+        return;
+      }
+      displayNote(noteInput);
+      saveNoteToLocalStorage(noteInput);
+      document.getElementById("note-input").value = "";
+    }
+
+    function displayNote(noteText) {
+      const noteList = document.getElementById("note-list");
+      const li = document.createElement("li");
+      li.textContent = noteText;
+
+      // Delete button
+      const deleteBtn = document.createElement("button");
+      deleteBtn.textContent = "❌";
+      deleteBtn.style.marginLeft = "10px";
+      deleteBtn.onclick = function () {
+        noteList.removeChild(li);
+        removeNoteFromLocalStorage(noteText);
+      };
+
+      li.appendChild(deleteBtn);
+      noteList.appendChild(li);
+    }
+    
+    function removeNoteFromLocalStorage(note) {
+      let notes = JSON.parse(localStorage.getItem("notes")) || [];
+      notes = notes.filter(n => n !== note);
+      localStorage.setItem("notes", JSON.stringify(notes));
+    }
+    async function generateNote() {
+  const API_KEY = "AIzaSyA9d36MWdK319Zm6l3HZy2yzv3Q7eZXaLE"; // Replace with your actual API key
+  const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+
+  const userInput = document.getElementById("note-input").value.trim();
+  if (userInput === "") {
+    alert("Please enter a topic for AI-generated notes!");
+    return;
+  }
+
+  const requestData = {
+    contents: [
+      {
+        parts: [{ text: `Generate a short note about: ${userInput}` }],
+      },
+    ],
+  };
+
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(requestData),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    if (data?.candidates?.length > 0) {
+      const aiNote = data.candidates[0]?.content?.parts[0]?.text;
+      alert(aiNote)
+      displayNote(aiNote);
+      saveNoteToLocalStorage(aiNote);
+      document.getElementById("note-input").value = "";
+    } else {
+      alert("AI failed to generate a note. Try again.");
+    }
+  } catch (error) {
+    console.error("Error fetching AI response:", error);
+  }
+}
+
+// Function to display the generated note
+function displayNote(noteText) {
+  const noteList = document.getElementById("note-list"); // Ensure correct ID
+  const li = document.createElement("li");
+  li.textContent = noteText;
+
+  // Delete button
+  const deleteBtn = document.createElement("button");
+  deleteBtn.textContent = "❌";
+  deleteBtn.style.marginLeft = "10px";
+  deleteBtn.onclick = function () {
+    noteList.removeChild(li);
+    removeNoteFromLocalStorage(noteText);
+  };
+
+  li.appendChild(deleteBtn);
+  noteList.appendChild(li);
+}
+
+// Function to save notes to local storage
+function saveNoteToLocalStorage(noteText) {
+  let notes = JSON.parse(localStorage.getItem("notes")) || [];
+  notes.push(noteText);
+  localStorage.setItem("notes", JSON.stringify(notes));
+}
+
+  </script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    .container {
+      display: flex;
+    }
+
+    .sidebar {
+      width: 250px;
+      height: 100vh;
+      background: #f0f0f0;
+      padding: 20px;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      color:#1b1b1bf3;
+    }
+
+    .search-bar {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .menu {
+      display: flex;
+      flex-direction: column;
+      margin: auto 10px;
+      text-decoration: none;
+    }
+
+    .menu-btn {
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0;
+      background: #062140;
+      color: rgb(246, 248, 246);
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .menu-btn:hover {
+      background: #357abd;
+    }
+
+    .content {
+      flex: 1;
+      padding: 20px;
+      background: white;
+    }
+
+    .input-area {
+      margin-bottom: 20px;
+    }
+
+    .input-area input {
+      padding: 10px;
+      width: 200px;
+      margin-right: 10px;
+    }
+
+    .input-area button {
+      padding: 10px;
+      background: #4a90e2;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    li {
+      padding: 10px;
+      margin: 5px 0;
+      background: #f9f9f9;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+  </style>
+</body>
+</html>

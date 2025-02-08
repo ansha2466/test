@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Reminder App</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Left Sidebar -->
+    <div class="sidebar">
+      <div class="logo">REMINDER APP</div>
+      <input type="text" class="search-bar" placeholder="Search...">
+      <div class="menu">
+        <a href="home.html"  class="menu-btn">Home</a>
+        <a href="must-do.html" class="menu-btn">Must do</a>
+        <a href="could-do.html" class="menu-btn">Could do</a>
+        <a href="notes.html" class="menu-btn">Notes</a>
+      </div>
+    </div>
+
+    <!-- Right Content Area -->
+    <div class="content">
+      <h2>Could Do (Set a Reminder)</h2>
+      <div class="input-area">
+        <input type="text" id="task-input" placeholder="Enter task...">
+        <input type="datetime-local" id="task-time">
+        <button onclick="addReminder()">Set Reminder</button>
+      </div>
+      <ul id="reminder-list"></ul>
+    </div>
+  </div>
+
+  <script>
+    function addReminder() {
+      const taskInput = document.getElementById("task-input");
+      const taskTime = document.getElementById("task-time");
+      const reminderList = document.getElementById("reminder-list");
+
+      if (taskInput.value.trim() === "" || taskTime.value === "") {
+        alert("Please enter both task and time!");
+        return;
+      }
+
+      const reminderTime = new Date(taskTime.value).getTime();
+      const currentTime = new Date().getTime();
+
+      if (reminderTime < currentTime) {
+        alert("Please select a future time!");
+        return;
+      }
+
+      // Create reminder list item
+      const li = document.createElement("li");
+      li.innerHTML = `<strong>${taskInput.value}</strong> at ${taskTime.value}`;
+
+      // Mark as completed button
+      const completeBtn = document.createElement("button");
+      completeBtn.textContent = "✔";
+      completeBtn.style.marginLeft = "10px";
+      completeBtn.style.backgroundColor = "green";
+      completeBtn.style.color = "white";
+      completeBtn.style.border = "none";
+      completeBtn.style.cursor = "pointer";
+
+      completeBtn.onclick = function () {
+        li.style.textDecoration = "line-through";
+        li.style.color = "gray";
+        notifyUser(`Reminder Completed: ${taskInput.value}`);
+      };
+
+      // Delete button
+      const removeBtn = document.createElement("button");
+      removeBtn.textContent = "❌";
+      removeBtn.style.marginLeft = "5px";
+      removeBtn.style.backgroundColor = "red";
+      removeBtn.style.color = "white";
+      removeBtn.style.border = "none";
+      removeBtn.style.cursor = "pointer";
+
+      removeBtn.onclick = function () {
+        reminderList.removeChild(li);
+      };
+
+      li.appendChild(completeBtn);
+      li.appendChild(removeBtn);
+      reminderList.appendChild(li);
+
+      // Set notification for the reminder time
+      setTimeout(() => {
+        notifyUser(`Reminder: ${taskInput.value}`);
+      }, reminderTime - currentTime);
+
+      taskInput.value = "";
+      taskTime.value = "";
+    }
+
+    function notifyUser(message) {
+      if (Notification.permission === "granted") {
+        new Notification("Reminder", { body: message });
+      } else if (Notification.permission !== "denied") {
+        Notification.requestPermission().then((permission) => {
+          if (permission === "granted") {
+            new Notification("Reminder", { body: message });
+          }
+        });
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    .container {
+      display: flex;
+    }
+
+    .sidebar {
+      width: 250px;
+      height: 100vh;
+      background: #f0f0f0;
+      padding: 20px;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      color:#1b1b1bf3;
+    }
+
+    .search-bar {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .menu {
+      display: flex;
+      flex-direction: column;
+      margin: auto 10px;
+      text-decoration: none;
+    }
+
+    .menu-btn {
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0;
+      background: #062140;
+      color: rgb(246, 248, 246);
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .menu-btn:hover {
+      background: #357abd;
+    }
+
+    .content {
+      flex: 1;
+      padding: 20px;
+      background: white;
+    }
+
+    .input-area {
+      margin-bottom: 20px;
+    }
+
+    .input-area input {
+      padding: 10px;
+      margin-right: 10px;
+    }
+
+    .input-area button {
+      padding: 10px;
+      background: #4a90e2;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    li {
+      padding: 10px;
+      margin: 5px 0;
+      background: #f9f9f9;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+  </style>
+</body>
+</html>
